@@ -16,15 +16,20 @@ kinesis_client = boto3.client("kinesis")
 
 def _set_api_user_id(**context):
     try:
-        api_user_id = int(Variable.get("api_user_id", default_var=-1))
-        logger.info(f"type:: {type(api_user_id)} and api_user_id:: {api_user_id}")
+        # Retrieve the variable, safely defaulting to string "-1"
+        api_user_id = int(Variable.get("api_user_id", default_var="-1"))
+        logger.info(
+            f"type:: {type(api_user_id)} and api_user_id:: {api_user_id}"
+        )
 
         if api_user_id == -1 or api_user_id >= 10:
             new_id = 1
         else:
             new_id = api_user_id + 1
 
-        Variable.set(key="api_user_id", value=new_id)
+        # FIX: Ensure value is cast to str() for Airflow Variable validation
+        Variable.set(key="api_user_id", value=str(new_id))
+
         logger.info(f"Latest api user id set to {new_id} successfully")
         return new_id
     except Exception as e:
